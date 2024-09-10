@@ -84,22 +84,15 @@ func fanin[T any, K any](done chan K, streams ...<-chan T) <-chan T {
 	return relaych
 }
 
-func take[T any, K any](done chan K, steam <-chan T, n int) <-chan T {
+func take[T any, K any](done chan K, stream <-chan T, n int) <-chan T {
 	ch := make(chan T)
 	go func() {
 		defer close(ch)
-		count := 0
-		for {
+		for i := 0; i < n; i++ {
 			select {
 			case <-done:
 				return
-			default:
-				if count < n {
-					count++
-					ch <- <-steam
-				} else {
-					return
-				}
+			case ch <- <-stream:
 			}
 		}
 	}()
